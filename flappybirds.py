@@ -47,7 +47,6 @@ class FlappyBirds:
     def start_evolution(self):
         fitness = np.zeros(POPULATION)
         generation = 0
-        total_fitness_history = []
         self.best_bird = []
         while True:
             # Start a game
@@ -64,13 +63,6 @@ class FlappyBirds:
             for i, val in score:
                 total_score += val
                 fitness[i] = val
-            fitness[:] / total_score
-
-            # Create completely new population if stagnation occurs
-            total_fitness_history.append(sum(fitness))
-            if len(total_fitness_history) > 1 and total_fitness_history[-1] == total_fitness_history[-2]:
-                self.ai_population.clear_pop()
-                self.ai_population.init_pop(POPULATION)
 
             # -- Get current individuals --
             individuals = [self.ai_population.get_ind(i, use_bias=True) for i in range(POPULATION)]
@@ -134,10 +126,8 @@ class FlappyBirds:
             self.clock.tick(FPS)
             if not self.bird_group:
                 self.clear_sprites()  # Delete sprites
-                try:
-                    tmp_best = max(score, key=lambda t: t[1])
-                except ValueError:  # If all birds decide to die at the same time
-                    tmp_best = (0, 1)
+                tmp_best = max(score, default=(0, 1), key=lambda t: t[1])  # Default used if all birds
+                # decide to die at the same time
                 print("Maximum score (Bird ID, Score): ", tmp_best)
                 best_bird = list(self.ai_population.get_ind(tmp_best[0], use_bias=True))
                 bird_score = tmp_best[1]
